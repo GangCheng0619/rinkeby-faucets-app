@@ -15,11 +15,28 @@ function App() {
 
   const acco_address = useRef("");
   const [tokenamount, setTokenAmount] = useState(0);
-  const [walletAddress, setWalletAddress] = useState("");
+  const [balance, setBalance] = useState("");
 
   useEffect(() => {
     connectWallet();
   }, []);
+
+  const getBalance = async () => {
+    if (window.ethereum) {
+      try {
+        var provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        var MyContract = myContract.connect(signer);
+        let balance = await MyContract.balanceOf(
+          window.ethereum.selectedAddress
+        );
+
+        setBalance(balance);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  };
 
   const connectWallet = () => {
     if (window.ethereum) {
@@ -27,6 +44,9 @@ function App() {
         window.ethereum.enable().then((res) => {
           console.log("Public Key is ", window.ethereum.selectedAddress);
           setWalletAddress(window.ethereum.selectedAddress);
+          if (res) {
+            getBalance();
+          }
         });
       } catch (e) {}
     }
